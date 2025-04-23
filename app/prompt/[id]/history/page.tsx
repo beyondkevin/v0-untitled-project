@@ -1,10 +1,8 @@
-import HistoryPageClient from "./HistoryPageClient"
-
-// 添加这个函数来预生成静态路径
 export function generateStaticParams() {
+  // 预生成这些ID的静态路径
   return [{ id: "text-prompt" }, { id: "image-prompt" }, { id: "function-prompt" }]
 }
 
-export default function HistoryPage() {
-  return <HistoryPageClient />
+export default function Page() {
+  return <div>{/* Page content goes here */}</div>
 }
