@@ -1,598 +1,298 @@
 "use client"
 
 import { useState } from "react"
+import { Save, Trash2, Users, Lock, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ChevronDown, ChevronLeft, Save, Trash, Plus, Copy, Download, Share2 } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function SettingsPageClient() {
   const [activeTab, setActiveTab] = useState("general")
-  const [isEditing, setIsEditing] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [promptName, setPromptName] = useState("示例提示词")
+  const [promptDescription, setPromptDescription] = useState("这是一个示例提示词，用于展示Knit的功能。")
+  const [isPublic, setIsPublic] = useState(false)
+
+  const handleSaveSettings = () => {
+    // 在实际应用中，这里会保存设置
+    alert("设置已保存")
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        alert("已复制到剪贴板")
+      })
+      .catch((err) => {
+        console.error("复制失败:", err)
+      })
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <a href="/" className="flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center text-white font-bold text-xl">
-                #
+    <div className="container mx-auto p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-2">设置</h1>
+        <p className="text-sm text-muted-foreground">管理您的提示词设置和访问权限。</p>
+      </div>
+
+      <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="general">常规</TabsTrigger>
+          <TabsTrigger value="sharing">共享</TabsTrigger>
+          <TabsTrigger value="advanced">高级</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general">
+          <Card>
+            <CardHeader>
+              <CardTitle>基本信息</CardTitle>
+              <CardDescription>更新您的提示词的基本信息。</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">提示词名称</label>
+                <Input value={promptName} onChange={(e) => setPromptName(e.target.value)} className="max-w-md" />
               </div>
-            </a>
-            <div className="text-gray-500 flex items-center gap-1">
-              <a href="/" className="hover:text-gray-700">
-                个人
-              </a>
-              <span>/</span>
-              <div className="flex items-center">
-                <a href="/prompt/text-prompt" className="hover:text-gray-700">
-                  文本提示词示例
-                </a>
-                <ChevronDown className="h-4 w-4 ml-1" />
+              <div>
+                <label className="block text-sm font-medium mb-1">描述</label>
+                <Textarea
+                  value={promptDescription}
+                  onChange={(e) => setPromptDescription(e.target.value)}
+                  className="max-w-md"
+                />
               </div>
-            </div>
-          </div>
-        </div>
-      </header>
+              <div>
+                <label className="block text-sm font-medium mb-1">标签</label>
+                <Input placeholder="添加标签，用逗号分隔" className="max-w-md" />
+                <p className="text-xs text-muted-foreground mt-1">标签可以帮助您更好地组织和查找提示词。</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">默认模型</label>
+                <Select defaultValue="claude-3-haiku">
+                  <SelectTrigger className="max-w-md">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="claude-3-haiku">claude-3-haiku</SelectItem>
+                    <SelectItem value="gpt-4o-mini">gpt-4o-mini</SelectItem>
+                    <SelectItem value="gpt-4o">gpt-4o</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleSaveSettings}>
+                <Save className="h-4 w-4 mr-2" />
+                保存更改
+              </Button>
+            </CardContent>
+          </Card>
 
-      <main className="flex-1 container mx-auto px-4 py-6">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => (window.location.href = "/prompt/text-prompt")}>
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              返回
-            </Button>
-            <h1 className="text-xl font-medium">提示词设置</h1>
-          </div>
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>危险区域</CardTitle>
+              <CardDescription>这些操作不可撤销，请谨慎操作。</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                删除提示词
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <div className="flex items-center gap-2">
-            {isEditing ? (
-              <>
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
-                  取消
-                </Button>
-                <Button className="bg-black hover:bg-gray-800 text-white" size="sm">
-                  <Save className="h-4 w-4 mr-1" />
-                  保存
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                  编辑
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      更多操作
-                      <ChevronDown className="h-4 w-4 ml-1" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Copy className="h-4 w-4 mr-2" />
-                      复制提示词
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Download className="h-4 w-4 mr-2" />
-                      导出提示词
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Share2 className="h-4 w-4 mr-2" />
-                      分享提示词
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
-                      <Trash className="h-4 w-4 mr-2" />
-                      删除提示词
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            )}
-          </div>
-        </div>
+        <TabsContent value="sharing">
+          <Card>
+            <CardHeader>
+              <CardTitle>共享设置</CardTitle>
+              <CardDescription>管理谁可以访问和编辑您的提示词。</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">公开访问</h3>
+                  <p className="text-sm text-muted-foreground">允许任何人查看此提示词。</p>
+                </div>
+                <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+              </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="general">基本设置</TabsTrigger>
-            <TabsTrigger value="advanced">高级设置</TabsTrigger>
-            <TabsTrigger value="variables">变量设置</TabsTrigger>
-            <TabsTrigger value="versions">版本历史</TabsTrigger>
-          </TabsList>
-
-          <div className="grid grid-cols-3 gap-6">
-            <div className="col-span-2">
-              <TabsContent value="general" className="space-y-6 mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>基本信息</CardTitle>
-                    <CardDescription>修改提示词的基本信息和类型</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="name" className="block mb-2">
-                        提示词名称
-                      </Label>
-                      <Input id="name" value="文本提示词示例" readOnly={!isEditing} />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="description" className="block mb-2">
-                        描述
-                      </Label>
-                      <Textarea
-                        id="description"
-                        placeholder="描述这个提示词的用途..."
-                        className="min-h-[100px]"
-                        value="这是一个基础的文本生成提示词示例，用于演示Knit平台的功能。"
-                        readOnly={!isEditing}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="type" className="block mb-2">
-                        提示词类型
-                      </Label>
-                      <Select defaultValue="text" disabled={!isEditing}>
-                        <SelectTrigger id="type">
-                          <SelectValue placeholder="选择类型" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="text">文本生成</SelectItem>
-                          <SelectItem value="image">图像生成</SelectItem>
-                          <SelectItem value="conversation">对话</SelectItem>
-                          <SelectItem value="function">函数调用</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>默认模型设置</CardTitle>
-                    <CardDescription>设置默认使用的模型和参数</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="model" className="block mb-2">
-                        默认模型
-                      </Label>
-                      <Select defaultValue="claude-3-haiku" disabled={!isEditing}>
-                        <SelectTrigger id="model">
-                          <SelectValue placeholder="选择模型" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="claude-3-haiku">claude-3-haiku</SelectItem>
-                          <SelectItem value="gpt-4o">gpt-4o</SelectItem>
-                          <SelectItem value="gpt-4o-mini">gpt-4o-mini</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="max_tokens" className="block mb-2">
-                          最大Token数
-                        </Label>
-                        <Input id="max_tokens" type="number" value="500" readOnly={!isEditing} />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="temperature" className="block mb-2">
-                          温度
-                        </Label>
-                        <Input id="temperature" type="number" step="0.1" value="0.7" readOnly={!isEditing} />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="advanced" className="space-y-6 mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>高级选项</CardTitle>
-                    <CardDescription>配置提示词的高级功能和行为</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-medium">自动保存运行结果</Label>
-                        <p className="text-sm text-gray-500">每次运行后自动保存结果到历史记录</p>
-                      </div>
-                      <Switch defaultChecked disabled={!isEditing} />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-medium">启用版本控制</Label>
-                        <p className="text-sm text-gray-500">跟踪提示词的所有更改</p>
-                      </div>
-                      <Switch defaultChecked disabled={!isEditing} />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-medium">允许共享</Label>
-                        <p className="text-sm text-gray-500">允许其他成员查看和使用此提示词</p>
-                      </div>
-                      <Switch defaultChecked disabled={!isEditing} />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-medium">启用批量运行</Label>
-                        <p className="text-sm text-gray-500">允许使用多组变量批量运行提示词</p>
-                      </div>
-                      <Switch disabled={!isEditing} />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-medium">启用API访问</Label>
-                        <p className="text-sm text-gray-500">允许通过API调用此提示词</p>
-                      </div>
-                      <Switch disabled={!isEditing} />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>提示词模板</CardTitle>
-                    <CardDescription>将此提示词保存为模板以便重复使用</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-medium">保存为模板</Label>
-                        <p className="text-sm text-gray-500">将此提示词保存为可重用的模板</p>
-                      </div>
-                      <Switch disabled={!isEditing} />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="template_name" className="block mb-2">
-                        模板名称
-                      </Label>
-                      <Input id="template_name" placeholder="输入模板名称" disabled={!isEditing} />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="template_category" className="block mb-2">
-                        模板分类
-                      </Label>
-                      <Select disabled={!isEditing}>
-                        <SelectTrigger id="template_category">
-                          <SelectValue placeholder="选择分类" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="general">通用</SelectItem>
-                          <SelectItem value="writing">写作</SelectItem>
-                          <SelectItem value="coding">编程</SelectItem>
-                          <SelectItem value="creative">创意</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="variables" className="space-y-6 mt-0">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle>变量组</CardTitle>
-                      <CardDescription>管理提示词中使用的变量组和变量</CardDescription>
-                    </div>
-                    {isEditing && (
-                      <Button size="sm">
-                        <Plus className="h-4 w-4 mr-1" />
-                        添加变量组
-                      </Button>
-                    )}
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="border rounded-md p-4 mb-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full bg-purple-300"></div>
-                          {isEditing ? (
-                            <Input className="w-[200px] h-8" value="组 #1" />
-                          ) : (
-                            <span className="font-medium">组 #1</span>
-                          )}
-                        </div>
-                        {isEditing && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-4 items-center">
-                          {isEditing ? (
-                            <>
-                              <Input placeholder="变量名" value="feature4" />
-                              <div className="flex items-center gap-2">
-                                <Input placeholder="变量值" value="提示词中的多变量支持" />
-                                <Button variant="ghost" size="icon">
-                                  <Trash className="h-4 w-4 text-red-500" />
-                                </Button>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="font-medium">feature4</div>
-                              <div>提示词中的多变量支持</div>
-                            </>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 items-center">
-                          {isEditing ? (
-                            <>
-                              <Input placeholder="变量名" value="question" />
-                              <div className="flex items-center gap-2">
-                                <Input placeholder="变量值" value="什么是 Knit？" />
-                                <Button variant="ghost" size="icon">
-                                  <Trash className="h-4 w-4 text-red-500" />
-                                </Button>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="font-medium">question</div>
-                              <div>什么是 Knit？</div>
-                            </>
-                          )}
-                        </div>
-
-                        {isEditing && (
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Plus className="h-4 w-4 mr-1" />
-                            添加变量
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>批量变量</CardTitle>
-                    <CardDescription>导入或创建批量变量用于批量运行提示词</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-medium">启用批量变量</Label>
-                        <p className="text-sm text-gray-500">使用CSV或JSON导入多组变量进行批量运行</p>
-                      </div>
-                      <Switch disabled={!isEditing} />
-                    </div>
-
-                    {isEditing && (
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          导入CSV
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          导入JSON
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          创建批量变量
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="versions" className="space-y-6 mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>版本历史</CardTitle>
-                    <CardDescription>查看和管理提示词的历史版本</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="border rounded-md overflow-hidden">
-                      <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
-                        <h3 className="font-medium">版本列表</h3>
-                        <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4 mr-1" />
-                          导出历史
-                        </Button>
-                      </div>
-                      <div className="divide-y">
-                        {[
-                          { id: 1, version: "v1.3", date: "2023-04-22 16:11:08", author: "您" },
-                          { id: 2, version: "v1.2", date: "2023-04-22 16:10:30", author: "您" },
-                          { id: 3, version: "v1.1", date: "2023-04-22 16:09:45", author: "您" },
-                          { id: 4, version: "v1.0", date: "2023-04-22 16:08:20", author: "您" },
-                        ].map((version) => (
-                          <div key={version.id} className="p-4 flex items-center justify-between">
-                            <div>
-                              <div className="font-medium">{version.version}</div>
-                              <div className="text-sm text-gray-500">
-                                {version.date} · {version.author}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm">
-                                查看
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                恢复
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>版本对比</CardTitle>
-                    <CardDescription>对比不同版本之间的变化</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="block mb-2">基准版本</Label>
-                        <Select defaultValue="v1.3">
-                          <SelectTrigger>
-                            <SelectValue placeholder="选择版本" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="v1.3">v1.3 (当前版本)</SelectItem>
-                            <SelectItem value="v1.2">v1.2</SelectItem>
-                            <SelectItem value="v1.1">v1.1</SelectItem>
-                            <SelectItem value="v1.0">v1.0</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="block mb-2">对比版本</Label>
-                        <Select defaultValue="v1.2">
-                          <SelectTrigger>
-                            <SelectValue placeholder="选择版本" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="v1.3">v1.3 (当前版本)</SelectItem>
-                            <SelectItem value="v1.2">v1.2</SelectItem>
-                            <SelectItem value="v1.1">v1.1</SelectItem>
-                            <SelectItem value="v1.0">v1.0</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <Button className="w-full">对比选中版本</Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </div>
-
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>使用统计</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">创建时间</span>
-                    <span>2023-04-01</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">最后修改</span>
-                    <span>2023-04-22</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">运行次数</span>
-                    <span>42</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">平均响应时间</span>
-                    <span>4.2秒</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">总成本</span>
-                    <span>$0.0082</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>访问权限</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">可见性</span>
-                    <Select defaultValue="private" disabled={!isEditing}>
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue placeholder="选择可见性" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="private">仅自己</SelectItem>
-                        <SelectItem value="team">团队成员</SelectItem>
-                        <SelectItem value="public">公开</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">编辑权限</span>
-                    <Select defaultValue="owner" disabled={!isEditing}>
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue placeholder="选择权限" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="owner">仅创建者</SelectItem>
-                        <SelectItem value="editors">编辑者</SelectItem>
-                        <SelectItem value="all">所有成员</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>API访问</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500">API状态</span>
-                    <Badge variant="outline" className="bg-gray-100 text-gray-600">
-                      未启用
-                    </Badge>
-                  </div>
-
-                  {isEditing && (
-                    <Button variant="outline" className="w-full">
-                      启用API访问
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>危险操作</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full text-red-600 hover:text-red-700 hover:bg-red-50">
-                    <Trash className="h-4 w-4 mr-1" />
-                    删除提示词
+              <div className="pt-4">
+                <h3 className="font-medium mb-2">共享链接</h3>
+                <div className="flex items-center gap-2">
+                  <Input value="https://knit.ai/prompts/example-123" readOnly className="max-w-md" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard("https://knit.ai/prompts/example-123")}
+                  >
+                    <Copy className="h-4 w-4" />
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">任何拥有此链接的人都可以查看此提示词。</p>
+              </div>
+
+              <div className="pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium">协作者</h3>
+                  <Button variant="outline" size="sm" onClick={() => setIsShareDialogOpen(true)}>
+                    <Users className="h-4 w-4 mr-2" />
+                    添加协作者
+                  </Button>
+                </div>
+                <div className="border rounded-md">
+                  <div className="flex items-center justify-between p-3 border-b">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">J</div>
+                      <div>
+                        <p className="font-medium">您</p>
+                        <p className="text-xs text-gray-500">you@example.com</p>
+                      </div>
+                    </div>
+                    <Badge>所有者</Badge>
+                  </div>
+                  <div className="p-3 text-center text-sm text-muted-foreground">还没有其他协作者。</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="advanced">
+          <Card>
+            <CardHeader>
+              <CardTitle>高级设置</CardTitle>
+              <CardDescription>配置提示词的高级选项。</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">默认温度</label>
+                <Input type="number" defaultValue="0.7" min="0" max="1" step="0.1" className="max-w-md" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  较高的值会使输出更加随机，较低的值会使其更加集中和确定性。
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">默认最大令牌数</label>
+                <Input type="number" defaultValue="500" min="1" max="4000" className="max-w-md" />
+                <p className="text-xs text-muted-foreground mt-1">限制生成响应的最大令牌数。</p>
+              </div>
+              <div className="flex items-center justify-between max-w-md">
+                <div>
+                  <h3 className="font-medium">启用版本控制</h3>
+                  <p className="text-sm text-muted-foreground">跟踪此提示词的所有更改。</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between max-w-md">
+                <div>
+                  <h3 className="font-medium">启用API访问</h3>
+                  <p className="text-sm text-muted-foreground">允许通过API访问此提示词。</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <Button onClick={handleSaveSettings}>
+                <Save className="h-4 w-4 mr-2" />
+                保存更改
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>API密钥</CardTitle>
+              <CardDescription>管理用于访问此提示词的API密钥。</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Input value="sk_prompt_123456789abcdef" type="password" className="max-w-md font-mono" />
+                <Button variant="outline" size="icon" onClick={() => copyToClipboard("sk_prompt_123456789abcdef")}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                此密钥允许通过API访问此提示词。请妥善保管，不要分享给他人。
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline">
+                  <Lock className="h-4 w-4 mr-2" />
+                  重新生成密钥
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>您确定要删除此提示词吗？</AlertDialogTitle>
+            <AlertDialogDescription>此操作不可撤销。这将永久删除您的提示词及其所有数据。</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700">删除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>添加协作者</DialogTitle>
+            <DialogDescription>邀请其他人协作编辑此提示词。</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">电子邮件地址</label>
+              <Input placeholder="输入电子邮件地址" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">权限</label>
+              <Select defaultValue="edit">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="view">只能查看</SelectItem>
+                  <SelectItem value="edit">可以编辑</SelectItem>
+                  <SelectItem value="admin">管理员</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </Tabs>
-      </main>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsShareDialogOpen(false)}>
+              取消
+            </Button>
+            <Button>发送邀请</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
